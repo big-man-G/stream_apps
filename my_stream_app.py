@@ -50,7 +50,7 @@ def get_currency_data(pair):
     ticker = yf.Ticker(pair)
     end_date = datetime.now()
     start_date = end_date - timedelta(days=3)
-    data = ticker.history(start=start_date, end=end_date, interval="5m")
+    data = ticker.history(start=start_date, end=end_date, interval="1m")
     data['Return'] = data['Close'].pct_change().fillna(0)
     data['Cumulative Return'] = (1 + data['Return']).cumprod() - 1
     return data
