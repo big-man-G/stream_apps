@@ -35,14 +35,14 @@ st.set_page_config(page_title="Trading Dashboard", layout="wide")
 # Title
 st.title("Trading Dashboard")
 
-# Define the list of currency pairs to watch
-currency_pairs = ["GBPUSD=X", "EURUSD=X", "USDJPY=X"]
-
-# Add a selectbox for currency pair selection
-selected_pair = st.selectbox("Select Currency Pair", currency_pairs)
+# Input for currency pairs
+st.sidebar.header("Currency Pair Selection")
+pair1 = st.sidebar.text_input("Enter first currency pair (e.g., GBPUSD=X)", "GBPUSD=X")
+pair2 = st.sidebar.text_input("Enter second currency pair (e.g., EURUSD=X)", "EURUSD=X")
+pair3 = st.sidebar.text_input("Enter third currency pair (e.g., USDJPY=X)", "USDJPY=X")
 
 # Refresh button
-if st.button('Refresh Data', key='refresh_button'):
+if st.sidebar.button('Refresh Data', key='refresh_button'):
     st.experimental_rerun()
 
 # Function to fetch data for a given currency pair
@@ -51,63 +51,64 @@ def get_currency_data(pair):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=3)
     data = ticker.history(start=start_date, end=end_date, interval="5m")
-    data['Return'] = data['Close'].pct_change().fillna(0)  # Calculate percentage change and fill NaN with 0
-    data['Cumulative Return'] = (1 + data['Return']).cumprod() - 1  # Calculate cumulative return
+    data['Return'] = data['Close'].pct_change().fillna(0)
+    data['Cumulative Return'] = (1 + data['Return']).cumprod() - 1
     return data
 
-# Function to update and display data for a given currency pair
-def update_data(pair):
-    data = get_currency_data(pair)
+# Function to create a price chart for multiple currency pairs
+def create_price_chart(pairs_data):
+    fig = go.Figure()
+    for pair, data in pairs_data.items():
+        fig.add_trace(go.Scatter(
+            x=data.index,
+            y=data['Close'],
+            mode='lines',
+            name=pair
+        ))
+    fig.update_layout(title="Currency Pairs Price Movement", xaxis_title="Time", yaxis_title="Price")
+    return fig
+
+# Function to create a performance chart for multiple currency pairs
+def create_performance_chart(pairs_data):
+    fig = go.Figure()
+    for pair, data in pairs_data.items():
+        fig.add_trace(go.Scatter(
+            x=data.index,
+            y=data['Cumulative Return'],
+            mode='lines',
+            name=f"{pair} Cumulative Returns"
+        ))
+    fig.update_layout(title="Currency Pairs Performance", xaxis_title="Time", yaxis_title="Cumulative Return")
+    return fig
+
+# Fetch data for all pairs
+pairs = [pair1, pair2, pair3]
+pairs_data = {pair: get_currency_data(pair) for pair in pairs}
+
+# Create and display price chart
+price_chart = create_price_chart(pairs_data)
+st.plotly_chart(price_chart, use_container_width=True)
+
+# Create and display performance chart
+performance_chart = create_performance_chart(pairs_data)
+st.plotly_chart(performance_chart, use_container_width=True)
+
+# Display individual pair data
+for pair in pairs:
+    data = pairs_data[pair]
     current_price = data['Close'].iloc[-1]
     entry_price = 1.2500  # Replace with actual entry price or retrieve dynamically
 
     st.subheader(f"{pair} Data")
     st.metric("Current Price", f"{current_price:.4f}")
 
-    # Plot price data
-    fig_price = go.Figure()
-    fig_price.add_trace(go.Candlestick(
-        x=data.index,
-        open=data['Open'],
-        high=data['High'],
-        low=data['Low'],
-        close=data['Close'],
-        name=pair
-    ))
-    fig_price.update_layout(title=f"{pair} Price Movement", xaxis_title="Time", yaxis_title="Price")
-    st.plotly_chart(fig_price, use_container_width=True)
-
-    # Plot return data with entry price line
-    fig_return = go.Figure()
-    fig_return.add_trace(go.Scatter(
-        x=data.index,
-        y=data['Cumulative Return'],
-        mode='lines',
-        name=f"{pair} Cumulative Returns"
-    ))
-    fig_return.add_shape(
-        type="line",
-        x0=data.index[0],
-        y0=data['Cumulative Return'].iloc[0],
-        x1=data.index[-1],
-        y1=data['Cumulative Return'].iloc[-1],
-        line=dict(
-            color="black",
-            width=1,
-            dash="dashdot",
-        ),
-        name=f"Entry Price ({entry_price})"
-    )
-    fig_return.update_layout(title=f"{pair} Performance", xaxis_title="Time", yaxis_title="Cumulative Return")
-    st.plotly_chart(fig_return, use_container_width=True)
-
-    # Simulated open position data (replace this with actual data from your trading account)
+    # Simulated open position data
     open_position = {
         "Symbol": pair,
-        "Position": 10000,  # Assuming a long position of 10,000 units
+        "Position": 10000,
         "Entry Price": entry_price,
         "Current Price": current_price,
-        "Unrealized P&L": (current_price - entry_price) * 10000  # Update entry price accordingly
+        "Unrealized P&L": (current_price - entry_price) * 10000
     }
 
     st.subheader("Open Position")
@@ -122,12 +123,6 @@ def update_data(pair):
     col1.metric("Daily Change", f"{daily_change:.2f}%")
     col2.metric("Daily High", f"{daily_high:.4f}")
     col3.metric("Daily Low", f"{daily_low:.4f}")
-
-# Display data for the selected currency pair
-update_data(selected_pair)
-
-
-
 
 # Optional: Add auto-refresh using st.empty and time
 # import time
