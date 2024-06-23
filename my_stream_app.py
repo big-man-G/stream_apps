@@ -65,7 +65,15 @@ def create_performance_chart(pairs_data):
             mode='lines',
             name=f"{pair} Cumulative Returns"
         ))
-    fig.update_layout(title="Currency Pairs Performance", xaxis_title="Time", yaxis_title="Cumulative Return")
+    fig.update_layout(
+        title="Currency Pairs Performance",
+        xaxis_title="Time",
+        yaxis_title="Cumulative Return",
+        legend=dict(
+            bgcolor='rgba(0, 0, 0, 0.5)',
+            font=dict(color='white')
+        )
+    )
     return fig
 
 # Fetch data for all pairs
@@ -85,7 +93,15 @@ def create_price_chart(pair, data):
         mode='lines',
         name=pair
     ))
-    fig.update_layout(title=f"{pair} Price Movement", xaxis_title="Time", yaxis_title="Price")
+    fig.update_layout(
+        title=f"{pair} Price Movement",
+        xaxis_title="Time",
+        yaxis_title="Price",
+        legend=dict(
+            bgcolor='rgba(0, 0, 0, 0.5)',
+            font=dict(color='white')
+        )
+    )
     return fig
 
 # Display individual pair data
