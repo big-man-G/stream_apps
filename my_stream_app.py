@@ -50,25 +50,12 @@ def get_currency_data(pair):
     ticker = yf.Ticker(pair)
     end_date = datetime.now()
     start_date = end_date - timedelta(days=3)
-    data = ticker.history(start=start_date, end=end_date, interval="1m")
+    data = ticker.history(start=start_date, end=end_date, interval="5m")
     data['Return'] = data['Close'].pct_change().fillna(0)
     data['Cumulative Return'] = (1 + data['Return']).cumprod() - 1
     return data
 
-# Function to create a price chart for multiple currency pairs
-def create_price_chart(pairs_data):
-    fig = go.Figure()
-    for pair, data in pairs_data.items():
-        fig.add_trace(go.Scatter(
-            x=data.index,
-            y=data['Close'],
-            mode='lines',
-            name=pair
-        ))
-    fig.update_layout(title="Currency Pairs Price Movement", xaxis_title="Time", yaxis_title="Price")
-    return fig
-
-# Function to create a performance chart for multiple currency pairs
+# Function to create a combined performance chart for multiple currency pairs
 def create_performance_chart(pairs_data):
     fig = go.Figure()
     for pair, data in pairs_data.items():
@@ -85,13 +72,21 @@ def create_performance_chart(pairs_data):
 pairs = [pair1, pair2, pair3]
 pairs_data = {pair: get_currency_data(pair) for pair in pairs}
 
-# Create and display price chart
-price_chart = create_price_chart(pairs_data)
-st.plotly_chart(price_chart, use_container_width=True)
-
 # Create and display performance chart
 performance_chart = create_performance_chart(pairs_data)
 st.plotly_chart(performance_chart, use_container_width=True)
+
+# Function to create individual price charts
+def create_price_chart(pair, data):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=data.index,
+        y=data['Close'],
+        mode='lines',
+        name=pair
+    ))
+    fig.update_layout(title=f"{pair} Price Movement", xaxis_title="Time", yaxis_title="Price")
+    return fig
 
 # Display individual pair data
 for pair in pairs:
@@ -123,6 +118,11 @@ for pair in pairs:
     col1.metric("Daily Change", f"{daily_change:.2f}%")
     col2.metric("Daily High", f"{daily_high:.4f}")
     col3.metric("Daily Low", f"{daily_low:.4f}")
+
+    # Create and display individual price chart
+    price_chart = create_price_chart(pair, data)
+    st.plotly_chart(price_chart, use_container_width=True)
+
 
 # Optional: Add auto-refresh using st.empty and time
 # import time
