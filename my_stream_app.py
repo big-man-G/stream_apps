@@ -32,13 +32,18 @@ from datetime import datetime, timedelta
 # Set page config
 st.set_page_config(page_title="Trading Dashboard", layout="wide")
 
-# Title and refresh button
+# Title
 st.title("Trading Dashboard")
-if st.button('Refresh Data', key='refresh_button'):
-    st.experimental_rerun()
 
 # Define the list of currency pairs to watch
 currency_pairs = ["GBPUSD=X", "EURUSD=X", "USDJPY=X"]
+
+# Add a selectbox for currency pair selection
+selected_pair = st.selectbox("Select Currency Pair", currency_pairs)
+
+# Refresh button
+if st.button('Refresh Data', key='refresh_button'):
+    st.experimental_rerun()
 
 # Function to fetch data for a given currency pair
 def get_currency_data(pair):
@@ -118,9 +123,8 @@ def update_data(pair):
     col2.metric("Daily High", f"{daily_high:.4f}")
     col3.metric("Daily Low", f"{daily_low:.4f}")
 
-# Create a tab for each currency pair
-for pair in currency_pairs:
-    update_data(pair)
+# Display data for the selected currency pair
+update_data(selected_pair)
 
 
 
