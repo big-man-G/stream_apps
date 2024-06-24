@@ -37,9 +37,9 @@ st.title("Trading Dashboard")
 
 # Input for currency pairs
 st.sidebar.header("Currency Pair Selection")
-pair1 = st.sidebar.text_input("Enter first currency pair (e.g., GBPUSD=X)", "GBPUSD=X")
-pair2 = st.sidebar.text_input("Enter second currency pair (e.g., EURUSD=X)", "EURUSD=X")
-pair3 = st.sidebar.text_input("Enter third currency pair (e.g., USDJPY=X)", "USDJPY=X")
+pair1 = st.sidebar.text_input("Enter first currency pair (e.g., GBPJPY=X)", "GBPUSD=X")
+pair2 = st.sidebar.text_input("Enter second currency pair (e.g., GBPUSD=X)", "EURUSD=X")
+pair3 = st.sidebar.text_input("Enter third currency pair (e.g., EURUSD=X)", "USDJPY=X")
 
 # Refresh button
 if st.sidebar.button('Refresh Data', key='refresh_button'):
